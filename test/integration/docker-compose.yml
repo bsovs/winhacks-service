@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  db:
+    image: mongo:4
+    volumes:
+      - integration-db:/var/lib/mongodb/data
+    ports:
+      - 1234:27017
+
+volumes:
+  integration-db:

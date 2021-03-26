@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  db:
+    image: mongo:4
+    volumes:
+      - winhacks-dev-db:/var/lib/mongodb/data
+    ports:
+      - 27017:27017
+
+volumes:
+  winhacks-dev-db:
