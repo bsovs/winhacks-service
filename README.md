@@ -3,8 +3,11 @@
 # winhacks
 This is a [Moleculer](https://moleculer.services/)-based microservices project. Generated with the [Moleculer CLI](https://moleculer.services/docs/0.14/moleculer-cli.html).
 
-## Overview
-
+## Architecture
+### Overview
+![arch-overview](https://raw.githubusercontent.com/bsovs/winhacks-service/main/.overview/winhacks-arch-overview.png?raw=true)
+### Query Logic
+![query-overview](https://raw.githubusercontent.com/bsovs/winhacks-service/main/.overview/winhacks-arch-query-logic.png?raw=true)
 
 ## Setup Environment
 - create a `.env` file in the root folder
