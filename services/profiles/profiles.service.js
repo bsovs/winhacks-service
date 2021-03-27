@@ -89,15 +89,21 @@ module.exports = {
         },
 
         swipe: {
+            rest: {
+                method: 'POST',
+                path: '/swipe',
+            },
             params: {
                 homeId: 'string',
-                like: 'bool',
+                rating: 'number',
             },
             async handler(ctx){
-                const { homeId, like } = ctx.params;
-                const { uid } = ctx.meta.user;
+                const { homeId, rating } = ctx.params;
+                const { uid } = ctx.meta.user
+
+                const isLike = this.isLike(rating)
                 let updated;
-                if(like) {
+                if(isLike) {
                     updated = await this.profiles.findByIdAndUpdate(uid, { $addToSet: { likes: homeId } });
                 } else {
                     updated = await this.profiles.findByIdAndUpdate(uid, { $addToSet: { dislikes: homeId } });
@@ -137,7 +143,11 @@ module.exports = {
         },
     },
 
-    methods: {},
+    methods: {
+        isLike(rating){
+            return rating == 1.0;
+        },
+    },
 
     async started() {},
 };

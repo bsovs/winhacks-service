@@ -149,7 +149,7 @@ module.exports = {
                         properati_url,
                         description,
                         title,
-                        images
+                        images,
                         ST_GeogPoint(lon, lat) AS loc,
                         ST_Distance(ST_GeogPoint(lon, lat), params.center) AS dist_meters
                       FROM
@@ -166,9 +166,9 @@ module.exports = {
                     ),
                     filtered_homes AS (
                       SELECT 
-                        *
+                        station.*
                       FROM 
-                        nearest_homes
+                        nearest_homes AS station, params
                       WHERE 
                         id NOT IN UNNEST(@filter)
                     ),
@@ -176,13 +176,19 @@ module.exports = {
                       SELECT 
                         station.* 
                       FROM 
-                        nearest_homes AS station, params
+                        filtered_homes AS station, params
                       WHERE 
                         rank <= params.maxn_homes
                     )
                     SELECT * from nearest_nhomes
                 `
-                const params = { radius, longitude: coords[0], latitude: coords[1], limit: this.settings.homes.limit, filter }
+                const params = {
+                    radius,
+                    longitude: coords[0],
+                    latitude: coords[1],
+                    limit: this.settings.homes.limit,
+                    filter: filter.length ? filter : ['']
+                }
                 return await this.bigQuery(query, params)
             },
         },
