@@ -190,12 +190,11 @@ module.exports = {
         swipe: {
             params: {
                 homeId: 'string',
-                like: 'bool',
+                rating: 'number',
             },
             async handler (ctx) {
-                const { homeId, like } = ctx.params
+                const { homeId, rating } = ctx.params
                 const { uid } = ctx.meta.user
-                const rating = this.getRating(like)
                 const query = `
                     INSERT INTO \`winhacks-308216.profiles_data.sample\` (profile_id, home_id, rating) 
                     VALUES (@profile_id, @home_id, @rating)
@@ -218,11 +217,7 @@ module.exports = {
    */
     },
 
-    methods: {
-        getRating (like) {
-            return like ? 1.0 : 0.0
-        },
-    },
+    methods: {},
 
     events: {},
 
