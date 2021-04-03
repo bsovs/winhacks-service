@@ -24,13 +24,121 @@ module.exports = {
     actions: {
         save: {
             params: {
-                title: 'string',
+                operation: { type: 'string', required: true },
+                property_type: { type: 'string', required: true },
+                lat: { type: 'string', required: true },
+                lon: { type: 'string', required: true },
+                city_name: { type: 'string', required: false },
+                country_name: { type: 'string', required: false },
+                state_name: { type: 'string', required: false },
+                title: { type: 'string', required: false },
+                price: { type: 'string', required: false },
+                currency: { type: 'string', required: false },
+                size: { type: 'string', required: false },
+                rooms: { type: 'string', required: false },
+                description: { type: 'string', required: false },
+                images: { type: 'string', required: false },
+                floor: { type: 'string', required: false },
+                expenses: { type: 'string', required: false },
+                source_url: { type: 'string', required: false },
             },
             async handler (ctx) {
-                const { title } = ctx.params
-                this.logger.info('Save called')
-                return await this.homes.create({ title })
+                const {
+                    operation,
+                    property_type,
+                    lat,
+                    lon,
+                    city_name,
+                    country_name,
+                    state_name,
+                    title,
+                    price,
+                    currency,
+                    size,
+                    rooms,
+                    description,
+                    images,
+                    floor,
+                    expenses,
+                    source_url,
+                } = ctx.params;
+                this.logger.info('Save called');
+
+                return await this.homes.create({
+                    location: {
+                        "type": "Point",
+                        "coordinates": [lon, lat]
+                    },
+                    operation,
+                    property_type,
+                    geo: { city_name, country_name, state_name, lat, lon },
+                    about: { description, title, price, currency, size, rooms, images },
+                    ext: { floor, expenses, source_url }
+                });
             },
+        },
+
+        // TODO: remove this
+        insert:{
+            async handler() {
+                return await this.homes.create({
+                    "location": {
+                        "type": "Point",
+                        "coordinates": [-79.3338102, 43.5675433]
+                    },
+                    "created_on": "2021-03-28",
+                    "operation": "sell",
+                    "property_type": "condo",
+                    "geo": {
+                        "city_name": "toronto",
+                        "country_name": "Canada",
+                        "state_name": "Ontario",
+                        "lat": "43.5675433",
+                        "lon": "-79.3338102"
+                    },
+                    "about": {
+                        "description": "An Astonishing Penthouse Of Rare Size, Location And Design. One Of Just 14 Discrete Residences At Hill And Dale, An Acclaimed Building Where Summerhill Meets Rosedale. This Fully-Customized Penthouse Features 12 Foot Ceilings, Uninterrupted East And West Exposures, 3 Bedrooms And 4 Baths Spanning Approximately 4000 Square Feet. 3 Private Terraces Including An Incomparable Rooftop With Pristine City Views And Private Pool.",
+                        "title": "1 Roxborough St E PENTHOUSE 2, Toronto, ON",
+                        "price": "1.28E7",
+                        "currency": "CAD",
+                        "size": "4000",
+                        "rooms": "4",
+                        "images": ["https://photos.zillowstatic.com/fp/b603244c00d6aed5bdfc6e5abcd942b7-cc_ft_768.jpg", "https://photos.zillowstatic.com/fp/8cc7a8df048c797741220e31bd6686bf-uncropped_scaled_within_1536_1152.webp", "https://photos.zillowstatic.com/fp/c03ab7bc6e420b367d524e4f020dbac0-uncropped_scaled_within_1536_1152.webp", "https://photos.zillowstatic.com/fp/08ea87955287a4625bf0a9324b25aef8-uncropped_scaled_within_1536_1152.webp", "https://photos.zillowstatic.com/fp/8601eb88167f84bd7d8454a1113d38c3-uncropped_scaled_within_1536_1152.webp", "https://photos.zillowstatic.com/fp/d18cc214f7e132a4ce028b5f3c769dc4-uncropped_scaled_within_1536_1152.webp"]
+                    },
+                    "ext": {
+                        "floor": null,
+                        "expenses": null,
+                        "source_url": "https://www.zillow.com/homedetails/1-Roxborough-St-E-PENTHOUSE-2-Toronto-ON-M4W-1V5/2077447832_zpid/?"
+                    }
+                });
+            },
+        },
+
+        near: {
+            params: {
+                lat: 'number',
+                lon: 'number'
+            },
+            async handler (ctx) {
+                const { lat, lon } = ctx.params;
+                //const profile = await ctx.call('profiles.me');
+                //const filterOut = _.concat(profile.likes, profile.dislikes);
+                const filterOut = [];
+                const profile = { radius: 100 };
+                return await this.homes.find({
+                    _id: {$nin: filterOut},
+                    location: {
+                        $near: {
+                            $geometry: {
+                                type: "Point" ,
+                                coordinates: [ lon, lat ]
+                            },
+                            $maxDistance: this.toMeters(profile.radius),
+                            $minDistance: 0,
+                        }
+                    }
+                }).limit(this.settings.homes.limit);
+            }
         },
 
         fetch: {
@@ -45,6 +153,8 @@ module.exports = {
                 return await ctx.call('homes.within', { radius: profile.radius, coords: [lon, lat], filter });
             },
         },
+
+        // TODO: Move BigQueries to Python and replace with Mongoose
 
         find: {
             rest: {
@@ -223,7 +333,9 @@ module.exports = {
    */
     },
 
-    methods: {},
+    methods: {
+        toMeters(km){ return km * 1000 }
+    },
 
     events: {},
 
