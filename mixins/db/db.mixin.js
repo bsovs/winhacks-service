@@ -36,7 +36,12 @@ module.exports = {
         Object.keys(models).map((name) => {
             if (this[name]) throw new ServiceSchemaError(`Could not add model name ${name} to service, it already exists`, {});
             const model = models[name];
-            this[name] = this.adapter.model(name, new Schema({ ...model.attributes, created: { type: Date, default: Date.now } }, { autoCreate: true, ...model.options }));
+
+            const schema = new Schema({ ...model.attributes, created: { type: Date, default: Date.now } }, { autoCreate: true, ...model.options });
+            if(model.indexes) {
+                schema.index(model.indexes)
+            }
+            this[name] = this.adapter.model(name, schema);
         });
     },
 

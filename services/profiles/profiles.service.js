@@ -1,4 +1,4 @@
-const DbMixin = require('../../mixins/db.mixin');
+const DbMixin = require('../../mixins/db/db.mixin');
 const models = require('./profiles.model');
 const _ = require('lodash');
 const E = require('../../errors');

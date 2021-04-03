@@ -1,6 +1,7 @@
-const DbMixin = require('../../mixins/db.mixin')
-const BigQueryMixin = require('../../mixins/bigquery.mixin')
+const DbMixin = require('../../mixins/db/db.mixin')
+const BigQueryMixin = require('../../mixins/bigQuery/bigquery.mixin')
 const models = require('./homes.model')
+const { validationGenerator } = require('../../validator/schema')
 const _ = require('lodash')
 const E = require('../../errors')
 
@@ -23,62 +24,14 @@ module.exports = {
 
     actions: {
         save: {
-            params: {
-                operation: { type: 'string', required: true },
-                property_type: { type: 'string', required: true },
-                lat: { type: 'string', required: true },
-                lon: { type: 'string', required: true },
-                city_name: { type: 'string', required: false },
-                country_name: { type: 'string', required: false },
-                state_name: { type: 'string', required: false },
-                title: { type: 'string', required: false },
-                price: { type: 'string', required: false },
-                currency: { type: 'string', required: false },
-                size: { type: 'string', required: false },
-                rooms: { type: 'string', required: false },
-                description: { type: 'string', required: false },
-                images: { type: 'string', required: false },
-                floor: { type: 'string', required: false },
-                expenses: { type: 'string', required: false },
-                source_url: { type: 'string', required: false },
-            },
+            params: validationGenerator(models.homes, 'Homes'),
             async handler (ctx) {
-                const {
-                    operation,
-                    property_type,
-                    lat,
-                    lon,
-                    city_name,
-                    country_name,
-                    state_name,
-                    title,
-                    price,
-                    currency,
-                    size,
-                    rooms,
-                    description,
-                    images,
-                    floor,
-                    expenses,
-                    source_url,
-                } = ctx.params;
                 this.logger.info('Save called');
-
-                return await this.homes.create({
-                    location: {
-                        "type": "Point",
-                        "coordinates": [lon, lat]
-                    },
-                    operation,
-                    property_type,
-                    geo: { city_name, country_name, state_name, lat, lon },
-                    about: { description, title, price, currency, size, rooms, images },
-                    ext: { floor, expenses, source_url }
-                });
+                return this.homes.create(ctx.params)
             },
         },
 
-        // TODO: remove this
+        // TODO: remove this. just here for testing populating db
         insert:{
             async handler() {
                 return await this.homes.create({

@@ -1,5 +1,7 @@
 'use strict';
 
+const Validator = require('./validator/validator');
+
 /**
  * Moleculer ServiceBroker configuration file
  *
@@ -146,7 +148,9 @@ module.exports = {
     },
 
     // Enable action & event parameter validation. More info: https://moleculer.services/docs/0.14/validating.html
-    validator: { type: 'Fastest', options: { useNewCustomCheckerFunction: true } },
+    validator: new Validator({
+        useNewCustomCheckerFunction: true,
+    }),
 
     errorHandler: null,
 
